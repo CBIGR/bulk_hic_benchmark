@@ -22,7 +22,8 @@ For each model:
    - Image quality  
    - Loop detection (using 4 loop callers: HICCUPS, SIP, LASCA, Mustache)
   
-![process drawio](https://github.ugent.be/vermeirssenlab/MasterThesis_Thu/assets/14965/08abcf07-9b45-437b-838c-e0fb8038e3e8)
+<img width="1779" height="1301" alt="process_v2" src="https://github.com/user-attachments/assets/0775e626-bbbc-4d73-b848-218eaacb3ab7" />
+
 
 
 ## Repository Structure
