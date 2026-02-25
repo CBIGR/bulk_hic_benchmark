@@ -1,0 +1,86 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=06:00:00
+#PBS -l mem=32gb
+
+ml load Single-cell-python-bundle/2024.02-foss-2023a
+ml load SAMtools/0.1.20-GCC-12.3.0
+ml load BEDTools/2.31.0-GCC-12.3.0  
+ml load deepTools/3.5.5-gfbf-2023a
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/epiphany/data_preparation
+
+# K562
+data_set="K562"
+output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/bigWig/K562"
+stage_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/bigWig/K562_raw"
+
+
+# DnaseI
+Dnase_data_path1="https://www.encodeproject.org/files/ENCFF205FNC/@@download/ENCFF205FNC.bam"
+Dnase_data_path2="https://www.encodeproject.org/files/ENCFF425WDA/@@download/ENCFF425WDA.bam"
+# CTCF
+CTCF_data_path1="https://www.encodeproject.org/files/ENCFF800GVR/@@download/ENCFF800GVR.bam"
+CTCF_data_path2="https://www.encodeproject.org/files/ENCFF196QVZ/@@download/ENCFF196QVZ.bam"
+# H3K27ac
+K27ac_data_path1="https://www.encodeproject.org/files/ENCFF600THN/@@download/ENCFF600THN.bam"
+K27ac_data_path2="https://www.encodeproject.org/files/ENCFF704LGA/@@download/ENCFF704LGA.bam"
+# H3K27me3
+K27me3_data_path1="https://www.encodeproject.org/files/ENCFF392ZKG/@@download/ENCFF392ZKG.bam"
+K27me3_data_path2="https://www.encodeproject.org/files/ENCFF905CZD/@@download/ENCFF905CZD.bam"
+# H3K4me3
+K4me3_data_path1="https://www.encodeproject.org/files/ENCFF440ARP/@@download/ENCFF440ARP.bam"
+K4me3_data_path2="https://www.encodeproject.org/files/ENCFF656DMV/@@download/ENCFF656DMV.bam"
+
+# bash ./bam2bw.sh $CTCF_data_path1 $CTCF_data_path2 $stage_path $output_path K562_CTCF
+# echo "finish K562_CTCF"
+
+bash ./bam2bw.sh $Dnase_data_path1 $Dnase_data_path2 $stage_path $output_path K562_DNaseI
+echo "finish K562_DNaseI"
+
+bash ./bam2bw.sh $K27ac_data_path1 $K27ac_data_path2 $stage_path $output_path K562_H3K27ac
+echo "finish K562_H3K27ac"
+
+bash ./bam2bw.sh $K27me3_data_path1 $K27me3_data_path2 $stage_path $output_path K562_H3K27me3
+echo "finish K562_H3K27me3"
+
+bash ./bam2bw.sh $K4me3_data_path1 $K4me3_data_path2 $stage_path $output_path K562_H3K4me3 
+echo "finish K562_H3K4me3"
+
+# IMR90
+data_set_I="IMR90"
+output_path_I="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/bigWig/IMR90"
+stage_path_I="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/bigWig/IMR90_raw"
+
+
+# DnaseI
+Dnase_data_path1_I="https://www.encodeproject.org/files/ENCFF264LKY/@@download/ENCFF264LKY.bam"
+Dnase_data_path2_I=""
+# CTCF
+CTCF_data_path1_I="https://www.encodeproject.org/files/ENCFF584CBK/@@download/ENCFF584CBK.bam"
+CTCF_data_path2_I="https://www.encodeproject.org/files/ENCFF160QTH/@@download/ENCFF160QTH.bam"
+# H3K27ac
+K27ac_data_path1_I="https://www.encodeproject.org/files/ENCFF064XTS/@@download/ENCFF064XTS.bam"
+K27ac_data_path2_I="https://www.encodeproject.org/files/ENCFF827KCG/@@download/ENCFF827KCG.bam"
+# H3K27me3
+K27me3_data_path1_I="https://www.encodeproject.org/files/ENCFF547BFL/@@download/ENCFF547BFL.bam"
+K27me3_data_path2_I="https://www.encodeproject.org/files/ENCFF084CZB/@@download/ENCFF084CZB.bam"
+# H3K4me3
+K4me3_data_path1_I="https://www.encodeproject.org/files/ENCFF021CLP/@@download/ENCFF021CLP.bam"
+K4me3_data_path2_I="https://www.encodeproject.org/files/ENCFF355WLE/@@download/ENCFF355WLE.bam"
+
+bash ./bam2bw.sh $CTCF_data_path1_I $CTCF_data_path2_I $stage_path_I $output_path_I IMR90_CTCF
+echo "finish IMR90_CTCF"
+
+bash ./bam2bw.sh $Dnase_data_path1_I $Dnase_data_path2_I $stage_path_I $output_path_I "IMR90_DNaseI"
+echo "finish IMR90_DNaseI"
+
+bash ./bam2bw.sh $K27ac_data_path1_I $K27ac_data_path2_I $stage_path_I $output_path_I "IMR90_H3K27ac"
+echo "finish IMR90_H3K27ac"
+
+bash ./bam2bw.sh $K27me3_data_path1_I $K27me3_data_path2_I $stage_path_I $output_path_I "IMR90_H3K27me3"
+echo "finish IMR90_H3K27me3"
+
+bash ./bam2bw.sh $K4me3_data_path1_I $K4me3_data_path2_I $stage_path_I $output_path_I "IMR90_H3K4me3" 
+echo "finish IMR90_H3K4me3"

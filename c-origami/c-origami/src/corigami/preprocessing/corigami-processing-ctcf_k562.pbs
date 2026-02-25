@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=06:00:00
+#PBS -l mem=16gb
+
+ml load  seqtk/1.4-GCC-13.3.0 
+ml load SAMtools/1.21-GCC-13.3.0 
+
+## Download All Files
+
+## input is control, ip is input data
+
+dataset="k562"
+data_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/data/hg38/${dataset}/ctcf"
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/c-origami/src/corigami/preprocessing
+
+
+wget -O ${data_path}/input1file.fastq.gz https://www.encodeproject.org/files/ENCFF317LUD/@@download/ENCFF317LUD.fastq.gz
+wget -O ${data_path}/input2file.fastq.gz https://www.encodeproject.org/files/ENCFF338QTL/@@download/ENCFF338QTL.fastq.gz
+
+wget -O ${data_path}/ip1file.fastq.gz https://www.encodeproject.org/files/ENCFF001HTO/@@download/ENCFF001HTO.fastq.gz
+wget -O ${data_path}/ip2file.fastq.gz https://www.encodeproject.org/files/ENCFF001HTP/@@download/ENCFF001HTP.fastq.gz
+echo "All files downloaded, merging"
+
+echo "All files downloaded, merging"
+# Merge fastq files
+cat  ${data_path}/ip1file.fastq.gz  ${data_path}/ip2file.fastq.gz > ${data_path}/ip.fastq.gz
+cat ${data_path}/input1file.fastq.gz  ${data_path}/input2file.fastq.gz > ${data_path}/input.fastq.gz
+
+echo "Files merged, subsampling"
+# subsample fastq files
+zcat ${data_path}/ip.fastq.gz | echo "IP reads: $((`wc -l`/4))"
+seqtk sample -s 2021 ${data_path}/ip.fastq.gz 30000000 | gzip > ${data_path}/sub_ip_R1.fastq.gz
+zcat ${data_path}/sub_ip_R1.fastq.gz | echo "sub IP reads: $((`wc -l`/4))"
+
+zcat ${data_path}/input.fastq.gz | echo "input reads: $((`wc -l`/4))"
+seqtk sample -s 2021 ${data_path}/input.fastq.gz 30000000 | gzip > ${data_path}/sub_input_R1.fastq.gz
+zcat ${data_path}/sub_input_R1.fastq.gz | echo "sub input reads: $((`wc -l`/4))"
+
+
+./sns/generate-settings hg38
+./sns/gather-fastqs ${data_path}
+./sns/run chip
+
+
+echo "Pipeline job submitted"

@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=50:00:00
+#PBS -l mem=32gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/ablation_testing/bigWig
+
+for dataset in GM12878 H1; do
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/ablation_testing/bigWig/${dataset}"
+    for modality in DNaseI CTCF H3K27ac H3K27me3 H3K4me3; do
+        file_name="${dataset}_${modality}_merge.bigWig"
+        ./bigWigToBedGraph "${path}/${file_name}.bw" ${path}/temp.bg
+        awk '{print $1, $2, $3, 0}' ${path}/temp.bg > ${path}/temp_zero.bg
+        head ${path}/temp_zero.bg
+        ./bedGraphToBigWig ${path}/temp_zero.bg hg38.chrom.sizes "${path}/${file_name}_zero.bw"
+        rm ${path}/temp.bg ${path}/temp_zero.bg
+    done
+done

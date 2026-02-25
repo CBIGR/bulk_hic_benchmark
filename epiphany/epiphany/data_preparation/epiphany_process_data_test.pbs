@@ -1,0 +1,49 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=06:00:00
+#PBS -l mem=32gb
+
+ml load Single-cell-python-bundle/2024.02-foss-2023a
+ml load SAMtools/0.1.20-GCC-12.3.0
+ml load BEDTools/2.31.0-GCC-12.3.0  
+ml load deepTools/3.5.5-gfbf-2023a
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/epiphany/data_preparation
+
+DOWNLOAD_FOLDER="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/bigWig/IMR90_raw"
+FILE_STORE_FOLDER="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/bigWig/IMR90"
+
+# # DnaseI
+# Dnase_data_path1_I="https://www.encodeproject.org/files/ENCFF264LKY/@@download/ENCFF264LKY.bam"
+# file_name_Dnase="IMR90_DNaseI"
+# wget "${Dnase_data_path1_I}" -O "${FILE_STORE_FOLDER}"/${file_name_Dnase}_merged.bam
+
+# samtools sort ${FILE_STORE_FOLDER}/${file_name_Dnase}_merged.bam ${FILE_STORE_FOLDER}/${file_name_Dnase}_merged_sorted
+# samtools index ${FILE_STORE_FOLDER}/${file_name_Dnase}_merged_sorted.bam
+
+# bamCoverage --bam ${FILE_STORE_FOLDER}/${file_name_Dnase}_merged_sorted.bam \
+#    -o ${FILE_STORE_FOLDER}/${file_name_Dnase}_merged_sorted_RPKM.bw \
+#    --normalizeUsing RPKM \
+#    --binSize 10 \
+#    --ignoreForNormalization chrX
+
+
+
+# H3K4me3
+K4me3_data_path1_I="https://www.encodeproject.org/files/ENCFF021CLP/@@download/ENCFF021CLP.bam"
+K4me3_data_path2_I="https://www.encodeproject.org/files/ENCFF355WLE/@@download/ENCFF355WLE.bam"
+FILE_NAME="IMR90_H3K4me3"
+
+wget "${K4me3_data_path1_I}" -O "${DOWNLOAD_FOLDER}"/"${FILE_NAME}"_rep1.bam
+wget "${K4me3_data_path2_I}" -O "${DOWNLOAD_FOLDER}"/"${FILE_NAME}"_rep2.bam
+
+samtools merge -f ${FILE_STORE_FOLDER}/${FILE_NAME}_merged.bam ${DOWNLOAD_FOLDER}/${FILE_NAME}_rep1.bam ${DOWNLOAD_FOLDER}/${FILE_NAME}_rep2.bam
+samtools sort ${FILE_STORE_FOLDER}/${FILE_NAME}_merged.bam ${FILE_STORE_FOLDER}/${FILE_NAME}_merged_sorted
+samtools index ${FILE_STORE_FOLDER}/${FILE_NAME}_merged_sorted.bam
+
+bamCoverage --bam "${FILE_STORE_FOLDER}"/"${FILE_NAME}"_merged_sorted.bam \
+    -o "${FILE_STORE_FOLDER}"/"${FILE_NAME}"_merged_sorted_RPKM.bw \
+    --normalizeUsing RPKM \
+    --binSize 10 \
+    --ignoreForNormalization chrX

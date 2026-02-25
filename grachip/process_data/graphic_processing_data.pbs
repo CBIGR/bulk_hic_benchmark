@@ -1,0 +1,127 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=12
+#PBS -l walltime=30:00:00
+#PBS -l mem=64gb
+
+ml load Single-cell-python-bundle/2024.02-foss-2023a
+ml load SAMtools/0.1.20-GCC-12.3.0
+ml load BEDTools/2.31.0-GCC-12.3.0  
+
+cd  /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/process_data
+
+for dataset in GM12878 H1 K562; do
+    data_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/${dataset}_raw"
+    processed_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/$dataset"
+    echo $data_path
+    echo $processed_path
+    
+    for modality in CTCF K4me K4me3 K27ac K27me3; do
+        if [ $dataset = "GM12878" ]; then
+            if [ $modality = "K27me3" ]; then
+                data1="$data_path/4DNFI74K8QSV_rep1_H3K27me3_GM12878.bam"
+                data2="$data_path/4DNFIMJZ5B1V_rep2_H3K27me3_GM12878.bam"
+            elif [ $modality = "K4me" ]; then
+                data1="$data_path/4DNFI5R24BXO_rep1_H3K4me1_GM12878.bam"
+                data2="$data_path/4DNFI44D73KU_rep2_H3K4me1_GM12878.bam"
+            elif [ $modality = "K4me3" ]; then
+                data1="$data_path/4DNFIQ69E2QT_rep1_H3K4me3_GM12878.bam"
+                data2="$data_path/4DNFIP9JYOC7_rep2_H3K4me3_GM12878.bam"
+            elif [ $modality = "K27ac" ]; then
+                data1="$data_path/4DNFIU38AOAH_rep1_H3K27ac_GM12878.bam"
+                data2="$data_path/4DNFIPCWBPL6_rep1_H3K27ac_GM12878.bam"
+            elif [ $modality = "CTCF" ]; then
+                data1="$data_path/4DNFI2G71DR4_rep1_CTCF_GM12878.bam"
+                data2="$data_path/4DNFI9U71IB4_rep2_CTCF_GM12878.bam"
+            fi
+        elif [ $dataset = "H1" ]; then
+            if [ $modality = "K27me3" ]; then
+                data1="$data_path/4DNFIE1XUS5M_rep1_H3K27me3_H1.bam"
+                data2="$data_path/4DNFIVEYA5ZH_rep2_H3K27me3_H1.bam"
+            elif [ $modality = "K4me" ]; then
+                data1="$data_path/4DNFIMKPS3B5_rep2_H3K4me1_H1.bam"
+                data2="$data_path/4DNFIU973P2X_rep1_H3K4me1_H1.bam"
+            elif [ $modality = "K4me3" ]; then
+                data1="$data_path/4DNFIBC19N9Z_rep1_H3K4me3_H1.bam"
+                data2="$data_path/4DNFIU2WN75X_rep2_H3K4me3_H1.bam"
+            elif [ $modality = "K27ac" ]; then
+                data1="$data_path/4DNFI258RO3L_rep1_H3K27ac_H1.bam"
+                data2="$data_path/4DNFIYET6YFK_rep2_H3K27ac_H1.bam"
+            elif [ $modality = "CTCF" ]; then
+                data1="$data_path/4DNFIQY7L3RB_rep1_CFTF_H1.bam"
+                data2="$data_path/4DNFIQGEU6WS_rep2_CFTF_H1.bam"
+            fi
+        elif [ $dataset = "K562" ]; then
+            if [ $modality = "K27me3" ]; then
+                data1="$data_path/4DNFIBDJW6IC_rep1_H3K27me3_K562.bam"
+                data2="$data_path/4DNFIRWKCRVO_rep2_H3K27me3_K562.bam"
+            elif [ $modality = "K4me" ]; then
+                data1="$data_path/4DNFI9XDO4XQ_rep1_H3K4me1_K562.bam"
+                data2="$data_path/4DNFITZO3ODU_rep2_H3K4me1_K562.bam"
+            elif [ $modality = "K4me3" ]; then
+                data1="$data_path/4DNFIA9FCYJ6_rep1_H3K4me3_K562.bam"
+                data2="$data_path/4DNFI4WI95J5_rep2_H3K4me3_K562.bam"
+            elif [ $modality = "K27ac" ]; then
+                data1="$data_path/4DNFIEYAZI72_rep1_H3K27ac_K562.bam"
+                data2=""
+            elif [ $modality = "CTCF" ]; then
+                data1="$data_path/4DNFIGP1R3AP_rep1_CFTF_K562.bam"
+                data2="$data_path/4DNFIMX1TC1F_rep2_CFTF_K562.bam"
+            fi
+        fi
+        
+        echo $dataset
+        echo $modality
+        echo $data1
+        echo $data2
+        
+        # CUT&RUN processing pipeline of 4dn: https://data.4dnucleome.org/resources/data-analysis/cut-and-run-pipeline)
+        # using picard, merge + sort + mark duplicate
+        if [ -z "$data2" ]; then
+            java -jar picard.jar SortSam I=$data1 O=$data_path/merged_files.bam SORT_ORDER=coordinatejava
+        else
+            java -jar picard.jar MergeSamFiles I=$data1 I=$data2 O=$data_path/merged_files.bam
+        fi
+
+        java -jar picard.jar MarkDuplicates I=$data_path/merged_files.bam O=$data_path/marked_duplicates.bam M=$data_path/marked_dup_metrics.txt
+        rm $data_path/merged_files.bam
+        rm $data_path/marked_dup_metrics.txt
+        # remove duplicate
+        
+        samtools view -F 1024 -f 2 -b $data_path/marked_duplicates.bam
+        
+        # The alignments are converted into bedpe format using bedtools 
+        bedtools bamtobed -i $data_path/marked_duplicates.bam -bedpe > $data_path/output.bedpe
+        rm $data_path/marked_duplicates.bam
+        
+        # cleaning and sorting recommended for peak calling with SEACR 
+        awk '$1==$4 && $1!="." && $6-$2 < 1000 {print $0}' $data_path/output.bedpe | cut -f 1-6 | sort -k1,1 -k2,2n -k3,3n
+        
+        # chrome size file
+        # ./fetchChromSizes hg38 > hg38.chrom.sizes
+        
+        # convert to bed graph, apply guassian smoothing 
+        # => creates a Gaussian distribution around the midpoint of each read.
+        # => Locations with more overlapping reads are thus represented by larger peaks.
+        python call_gauss.py \
+            --in_bedpe $data_path/output.bedpe \
+            --chr_sizes hg38.chrom.sizes \
+            --outname $data_path/output.bedgraph
+        rm $data_path/output.bedpe
+        
+        # convert to bigwig
+        ./bedSort $data_path/output.bedgraph $data_path/sorted_output.bedgraph
+        ./bedGraphToBigWig $data_path/sorted_output.bedgraph hg38.chrom.sizes $processed_path/${modality}_${dataset}.bw
+        rm output.bedgraph
+        rm sorted_output.bedgraph
+        
+        echo "Finish! Data is saved as ${modality}_${dataset}.bw"
+        
+    done
+done
+    
+    
+    
+    
+    
+    

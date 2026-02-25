@@ -1,0 +1,124 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=16
+#PBS -l walltime=70:00:00
+#PBS -l mem=64gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+module load torchvision/0.16.0-foss-2023a
+module load pyBigWig/0.3.22-gfbf-2023a
+ml load pyfaidx/0.8.1.1-GCCcore-12.3.0 
+module load PyTorch-Geometric/2.5.0-foss-2023a-PyTorch-2.1.2
+# ml load OpenNMT-py/3.5.1-foss-2023a-CUDA-12.1.1 
+ml load Rust/1.70.0-GCCcore-12.3.0  
+ml load pybedtools/0.9.1-foss-2023a 
+ml load HF-Datasets/2.18.0-gfbf-2023a 
+
+cd "/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP"
+
+for dataset in GM12878; do 
+    model_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/models"
+    echo $output_path
+    # Loop through chromosomes 5, 6, 10, 15
+    for chr in 5 6 10 15; do
+        # Get the length of the chromosome (example values for GRCh38)
+        case $chr in
+            1) chr_length=240000000 ;;
+            2) chr_length=240000000 ;;
+            3) chr_length=190000000 ;;
+            4) chr_length=190000000 ;;
+            5) chr_length=180000000 ;;
+            6) chr_length=170000000 ;;
+            7) chr_length=150000000 ;;
+            8) chr_length=140000000 ;;
+            9) chr_length=130000000 ;;
+            10) chr_length=130000000 ;;
+            11) chr_length=130000000 ;;
+            12) chr_length=130000000 ;;
+            13) chr_length=110000000 ;;
+            14) chr_length=100000000 ;;
+            15) chr_length=100000000 ;;
+            16) chr_length=90000000 ;;
+            17) chr_length=80000000 ;;
+            18) chr_length=80000000 ;;
+            19) chr_length=50000000 ;;
+            20) chr_length=60000000 ;;
+            21) chr_length=40000000 ;;
+            22) chr_length=50000000 ;;
+    
+        esac
+        for test in {1..9}; do
+            # 1: ATAC. 2: CTCF, 3: K27me3, 4: K27ac, 5: K4me, 6: K4me3, 7:DNA 8: K27ac+K4me+K4me3, 9:all epigenomics
+            if [ $test = 1 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_ATAC.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/ATAC"
+            elif [ $test = 2 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_CTCF.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/CTCF"
+            elif [ $test = 3 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_K27me3.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/K27me3"
+            elif [ $test = 4 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_K27ac.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/K27ac"
+            elif [ $test = 5 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_K4me.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/K4me"
+            elif [ $test = 6 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_K4me3.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/K4me3"
+            elif [ $test = 7 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/bwlist_${dataset}.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/dna"
+            elif [ $test = 8 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_active_histone.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/active_histone"
+            elif [ $test = 9 ]; then
+                genome_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/hg38.fa"
+                bw_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/ablation_testing/bwlist_${dataset}_epigenomic.txt"
+                output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/abation_testing/${dataset}/epigenomic"
+            fi
+            
+            # Define space slicing size (2 million)
+            # Calculate slice size = round(length / 30)
+            n=10
+            slice_size=$(awk -v len="$chr_length" -v n="$n" 'BEGIN { s=len/n; if (s < 2000000) s=2000000; rounded = int((s + 500000) / 1000000) * 1000000; print rounded; }')
+        
+        
+            # Loop through positions in increments of 2 million
+            for ((start=1000000; start<$chr_length; start+=$slice_size)); do
+                end=$((start + slice_size - 1))
+        
+                # Make sure we don't go past the chromosome length
+                if (( start >= chr_length - 2000000 )); then
+                    break
+                fi
+        
+                # Here, you can perform your task, e.g., extract sequence or perform analysis
+                # Replace the echo statement with your actual command
+                echo "Chromosome: $chr, Start: $start, End: $end, Slice: $slice_size"
+                chrname="chr$chr"
+                
+                python prediction.py \
+                    --model "$model_path/model_weights_only.pt" \
+                    --encoder "$model_path/encoder.pt" \
+                    --chrom $chrname \
+                    --start $start \
+                    --genomic_data_paths $bw_file  \
+                    --output $output_path \
+                    --genome_path $genome_file\
+                    --input_edge "/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/input.cool" \
+                	--DNABERT "$model_path/6-new-12w-0"
+            done
+        done
+    done
+done    
+        

@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=5:00:00
+#PBS -l mem=64gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+ml load ArchR/1.0.2-20220704-foss-2023a-R-4.3.2 
+ml load BEDTools/2.31.0-GCC-12.3.0
+ml load SAMtools/1.18-GCC-12.3.0 
+ml load tabix/0.2.6-GCCcore-12.3.0 
+ml load R-bundle-CRAN/2023.12-foss-2023a 
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/chromafold/ChromaFold/preprocessing_pipeline
+SCRIPT_DIR="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/chromafold/ChromaFold/preprocessing_pipeline"
+GENOME_ASSEMBLY="hg38"
+
+dataset=GM12878
+SAVE_LOC="${SCRIPT_DIR}/data"
+DATA_PREFIX="${dataset}_fragments"
+FRAG_LOC="${SAVE_LOC}/fragments_by_celltype"
+FRAG_FILE_PREFIX="${DATA_PREFIX}"
+
+mkdir -p "${SAVE_LOC}"/archr_data/"${DATA_PREFIX}"
+ARCHR_LOC="${SAVE_LOC}"/archr_data/"${DATA_PREFIX}"
+
+gunzip -c "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}.tsv.gz" | bgzip  > "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz.tsv.gz" # convert gzip to bgzip
+sortBed -i "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz.tsv.gz" > "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz_sorted.tsv" # sort merged bgzip file
+htsfile "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz_sorted.tsv" # check whether file is in bed format
+bgzip "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz_sorted.tsv" # bgzip file for tabix
+
+rm "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz_sorted.tsv.gz.tbi" # remove previously calculated .tbi file
+rm "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz.tsv.gz" # remove intermediate files
+
+# mkdir -p atac
+# mkdir -p dna
+# mkdir -p predictions
+# mkdir -p assembly
+# wget -P assembly https://hgdownload.soe.ucsc.edu/goldenPath/hg38/bigZips/hg38.chrom.sizes
+# wget -P assembly https://hgdownload.soe.ucsc.edu/goldenPath/hg19/bigZips/hg19.chrom.sizes
+# wget -P assembly https://hgdownload.soe.ucsc.edu/goldenPath/mm10/bigZips/mm10.chrom.sizes
+# wget -P assembly https://hgdownload.soe.ucsc.edu/goldenPath/mm9/bigZips/mm9.chrom.sizes
+
+
+Rscript "${SCRIPT_DIR}"/ArchR_preparation.R \
+    "${DATA_PREFIX}" \
+    "${ARCHR_LOC}" \
+    "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz_sorted.tsv.gz" \
+    "${GENOME_ASSEMBLY}"
+
+python "${SCRIPT_DIR}"/scATAC_preparation.py \
+--cell_type_prefix "${DATA_PREFIX}" \
+--fragment_file  "${FRAG_LOC}"/"${FRAG_FILE_PREFIX}_bgz_sorted.tsv.gz" \
+--barcode_file "${ARCHR_LOC}"/archr_filtered_barcode.csv \
+--lsi_file "${ARCHR_LOC}"/archr_filtered_lsi.csv \
+--genome_assembly "${GENOME_ASSEMBLY}" \
+--save_path "${SAVE_LOC}"

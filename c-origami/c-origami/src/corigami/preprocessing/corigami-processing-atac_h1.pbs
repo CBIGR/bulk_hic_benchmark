@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=12
+#PBS -l walltime=24:00:00
+#PBS -l mem=32gb
+
+ml load  seqtk/1.4-GCC-13.3.0 
+ml load SAMtools/1.21-GCC-13.3.0 
+
+## Download All Files
+
+dataset="h1"
+data_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/data/hg38/${dataset}/atac"
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/c-origami/src/corigami/preprocessing
+
+curl -o ${data_path}/end1_rep1file.fastq.gz -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-fastq/4DNFIVWIBHN4/@@download/4DNFIVWIBHN4.fastq.gz
+curl -o ${data_path}/end2_rep1file.fastq.gz -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-fastq/4DNFIZPZJP65/@@download/4DNFIZPZJP65.fastq.gz
+curl -o ${data_path}/end1_rep2file.fastq.gz -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-fastq/4DNFIRULVCWY/@@download/4DNFIRULVCWY.fastq.gz
+curl -o ${data_path}/end2_rep2file.fastq.gz -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-fastq/4DNFITC6OSDJ/@@download/4DNFITC6OSDJ.fastq.gz
+
+echo "All files downloaded, merging"
+echo "All files downloaded, merging"
+## Cat different replicates
+cat ${data_path}/end1_rep1file.fastq.gz ${data_path}/end1_rep2.fastq.gz  > ${data_path}/fastq/end1/merged1.fastq.gz
+cat ${data_path}/end2_rep1file.fastq.gz ${data_path}/end2_rep2.fastq.gz > ${data_path}/fastq/end2/merged2.fastq.gz
+
+
+echo "Files merged, subsampling end 1"
+zcat ${data_path}/merged1.fastq.gz  | echo "end 1 reads: $((`wc -l`/4))"
+seqtk sample -s 2021 ${data_path}/merged1.fastq.gz 40000000 | gzip > ${data_path}/sub_merged_R1.fastq.gz 
+zcat ${data_path}/sub_merged_R1.fastq.gz  | echo "sub end 1 reads: $((`wc -l`/4))"
+
+echo "Files merged, subsampling end 2"
+zcat ${data_path}/merged2.fastq.gz | echo "end 2 reads: $((`wc -l`/4))"
+seqtk sample -s 2021 ${data_path}/merged2.fastq.gz 40000000 | gzip > ${data_path}/sub_merged_R2.fastq.gz
+zcat ${data_path}/sub_merged_R2.fastq.gz | echo "sub end 2 reads: $((`wc -l`/4))"
+
+sns/generate-settings hg38
+sns/gather-fastqs ${data_path}
+sns/run atac
+
+echo "Pipeline job submitted"

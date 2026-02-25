@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=10
+#PBS -l walltime=60:00:00
+#PBS -l mem=64gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+# module load torchvision/0.16.0-foss-2023a
+ml load PyTorch/2.1.2-foss-2023a 
+ml load  tabix/0.2.6-GCCcore-12.3.0
+ml load h5py/3.9.0-foss-2023a
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/chromafold/ChromaFold/chromafold
+
+for dataset in IMR90 H1 K562; do
+    datapath="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/chromafold/chromafold-dataset/${dataset}/processed_input"
+    savepath="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/chromafold/output/${dataset}"
+    modelpath="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/chromafold/models/chromafold_CTCFmotif.pth.tar"
+    for chr in {1..22}; do
+        # Get the length of the chromosome (example values for GRCh38)
+        case $chr in
+            1) chr_length=240000000 ;;
+            2) chr_length=240000000 ;;
+            3) chr_length=190000000 ;;
+            4) chr_length=190000000 ;;
+            5) chr_length=180000000 ;;
+            6) chr_length=170000000 ;;
+            7) chr_length=150000000 ;;
+            8) chr_length=140000000 ;;
+            9) chr_length=130000000 ;;
+            10) chr_length=130000000 ;;
+            11) chr_length=130000000 ;;
+            12) chr_length=130000000 ;;
+            13) chr_length=110000000 ;;
+            14) chr_length=100000000 ;;
+            15) chr_length=100000000 ;;
+            16) chr_length=90000000 ;;
+            17) chr_length=80000000 ;;
+            18) chr_length=80000000 ;;
+            19) chr_length=50000000 ;;
+            20) chr_length=60000000 ;;
+            21) chr_length=40000000 ;;
+            22) chr_length=50000000 ;;
+    
+        esac
+    
+        # Define space slicing size (2 million)
+        # Calculate slice size = round(length / 30)
+        n=50
+        slice_size=$(awk -v len="$chr_length" -v n="$n" 'BEGIN { s=len/n; if (s < 2000000) s=2000000; rounded = int((s + 500000) / 1000000) * 1000000; print rounded; }')
+    
+        python inference.py --data-path $datapath -ct $dataset -step $slice_size --model-path $modelpath -chrom $chr -offset 1000000 --genome hg38 --save-path $savepath
+    done
+done

@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=70:00:00
+#PBS -l mem=64gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+module load torchvision/0.16.0-foss-2023a
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/epiphany/downstream
+model_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/models/pretrained_GM12878.pt_model"
+
+for cell_type in H1; do
+    output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/output/whole/${cell_type}"
+    bw_dir="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/bigWig/${cell_type}"
+    for chr in {1..22}; do
+        echo $output_path
+        gt_file="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/ground_truth/${cell_type}/HiC_${cell_type}_chr${chr}_obs-over-exp_10000_diagonal.txt"
+        python epiphany_generation_whole.py --dataset $cell_type --model_path $model_path --output_path $output_path --bwfile_dir $bw_dir --gt_file $gt_file --chr $chr
+    done
+done
+
+# -l nodes=1:ppn=quarter:gpus=2

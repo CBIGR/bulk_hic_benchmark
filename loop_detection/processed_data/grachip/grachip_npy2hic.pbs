@@ -1,0 +1,31 @@
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=70:00:00
+#PBS -l mem=64gb
+
+ml load cooler/0.10.2-foss-2023b
+ml load statsmodels/0.14.1-gfbf-2023b
+ml load scikit-learn/1.4.0-gfbf-2023b 
+ml load tqdm/4.66.2-GCCcore-13.2.0 
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/grachip
+
+
+for dataset in GM12878 H1 IMR90 K562; do
+    datadir="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP/output/whole/${dataset}"
+    output="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/grachip/bedpe"
+    resolution=10000
+    window=2000000
+    python npy2bedpe.py --dataset $dataset --datadir $datadir --output $output --resolution $resolution --window_bp $window
+done
+
+chr_size="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/hg38.chrom.sizes"
+
+for dataset in GM12878 H1 IMR90 K562; do
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/grachip/bedpe/${dataset}_10000_norm.bedpe"
+    output="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/grachip/hic/grachip_${dataset}_norm.hic"
+    java -jar /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/juicer_tools_1.22.01.jar pre -d -r 10000 -k KR -v ${path} ${output} ${chr_size}
+    
+    path_count="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/grachip/bedpe/${dataset}_10000_count.bedpe"
+    output_count="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/grachip/hic/grachip_${dataset}_count.hic"
+    java -jar /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/juicer_tools_1.22.01.jar pre -d -r 10000 -k KR -v ${path_count} ${output_count} ${chr_size}
+done

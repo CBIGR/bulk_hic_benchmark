@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=03:00:00
+#PBS -l mem=8gb
+
+
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/IMR90
+
+wget -O CTCF_IMR90.bw https://www.encodeproject.org/files/ENCFF105FHL/@@download/ENCFF105FHL.bigWig
+wget -O K27ac_K562.bw https://www.encodeproject.org/files/ENCFF699OAR/@@download/ENCFF699OAR.bigWig
+wget -O K27me3_K562.bw https://www.encodeproject.org/files/ENCFF366BVS/@@download/ENCFF366BVS.bigWig
+wget -O K4me3_K562.bw https://www.encodeproject.org/files/ENCFF376ZIM/@@download/ENCFF376ZIM.bigWig
+wget -O K4me_K562.bw https://www.encodeproject.org/files/ENCFF221MJG/@@download/ENCFF221MJG.bigWig

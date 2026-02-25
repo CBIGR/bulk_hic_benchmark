@@ -1,0 +1,19 @@
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=70:00:00
+#PBS -l mem=64gb
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/SIP
+
+model_name="hicdiffusion"
+resolution=8192
+
+chrom_size="hg38.chrom.sizes" 
+path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/${model_name}/hic/${model_name}_hg38_count.hic"
+output="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/SIP/output/hicdiffusion/count"
+
+java -jar SIP.jar hic ${path} ${chrom_size} ${output} juicer_tools_1.13.02.jar -res ${resolution} -t 2300 -fdr 0.1
+
+path_norm="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/${model_name}/hic/${model_name}_hg38_norm.hic"
+output_norm="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/SIP/output/hicdiffusion/norm"
+java -jar SIP.jar hic ${path_norm} ${chrom_size} ${output_norm} juicer_tools_1.13.02.jar -res ${resolution} -t 2300 -fdr 0.1
+

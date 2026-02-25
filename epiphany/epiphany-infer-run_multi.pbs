@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=50:00:00
+#PBS -l mem=64gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+module load torchvision/0.16.0-foss-2023a
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/epiphany/downstream
+
+for cell_type in K562 H1 IMR90; do
+    output_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/output/${cell_type}"
+    echo $output_path
+    python epiphany_perturbations.py --c "$cell_type" --path $output_path
+done
+
+
+# Loop through chromosomes 1 to 22
+for cell_type in GM12878 K562 H1 IMR90; do
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/output/${cell_type}"
+    for chr in {1..22}; do
+        # Get the length of the chromosome (example values for GRCh38)
+        case $chr in
+            1) chr_length=240000000 ;;
+            2) chr_length=240000000 ;;
+            3) chr_length=190000000 ;;
+            4) chr_length=190000000 ;;
+            5) chr_length=180000000 ;;
+            6) chr_length=170000000 ;;
+            7) chr_length=150000000 ;;
+            8) chr_length=140000000 ;;
+            9) chr_length=130000000 ;;
+            10) chr_length=130000000 ;;
+            11) chr_length=130000000 ;;
+            12) chr_length=130000000 ;;
+            13) chr_length=110000000 ;;
+            14) chr_length=100000000 ;;
+            15) chr_length=100000000 ;;
+            16) chr_length=90000000 ;;
+            17) chr_length=80000000 ;;
+            18) chr_length=80000000 ;;
+            19) chr_length=50000000 ;;
+            20) chr_length=60000000 ;;
+            21) chr_length=40000000 ;;
+            22) chr_length=50000000 ;;
+    
+        esac
+    
+        # Define space slicing size (2 million)
+        # Calculate slice size = round(length / 30)
+        n=10
+        slice_size=$(awk -v len="$chr_length" -v n="$n" 'BEGIN { s=(len - 1000000)/n; if (s < 2000000) s=2000000; rounded = int((s + 500000) / 1000000) * 1000000; print rounded; }')
+    
+    
+        # Loop through positions in increments of 2 million
+        for ((start=1000000; start<$chr_length; start+=$slice_size)); do
+            end=$((start + slice_size - 1))
+    
+            # Make sure we don't go past the chromosome length
+            if (( start >= chr_length - 2000000 )); then
+                break
+            fi
+    
+            # Here, you can perform your task, e.g., extract sequence or perform analysis
+            # Replace the echo statement with your actual command
+            echo "Chromosome: $chr, Start: $start, End: $end, Slice: $slice_size"
+            chrname="chr$chr"
+    
+            java -Xms1024M -jar juicer_tools_1.22.01.jar pre -d -c ${chrname: -1} -r 5000 -n -v ${path}/temp_${chrname}_${start}.txt.gz ${path}/temp_${chrname}_${start}.hic hg38
+            java -Xms1024M -jar juicer_tools_1.22.01.jar pre -d -c ${chrname: -1} -r 5000 -n -v ${path}/temp_del_${chrname}_${start}.txt.gz ${path}/temp_del_${chrname}_${start}.hic hg38
+        done
+    done
+done
+

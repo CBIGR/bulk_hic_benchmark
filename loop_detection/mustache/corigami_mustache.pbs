@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=12:00:00
+#PBS -l mem=32gb
+
+ml load cooler/0.10.2-foss-2023b
+ml load  hic-straw/1.3.1-foss-2023b
+ml load statsmodels/0.14.1-gfbf-2023b 
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/mustache
+resolution=8192
+model_name="corigami"
+for dataset in GM12878 H1 K562 IMR90; do
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/${model_name}/hic/${model_name}_${dataset}_count.hic"
+    output="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/mustache/output/${dataset}/${model_name}/${model_name}_${dataset}_mustache_count.tsv"
+    python -m mustache -f ${path} -r $resolution -pt 0.1 -o ${output} -cz hg38.chrom.sizes
+    
+    path_norm="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/processed_data/output/${model_name}/hic/${model_name}_${dataset}_norm.hic"
+    output_norm="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/mustache/output/${dataset}/${model_name}/${model_name}_${dataset}_mustache_norm.tsv"
+    python -m mustache -f ${path_norm} -r $resolution -pt 0.1 -o ${output_norm} -cz hg38.chrom.sizes
+done

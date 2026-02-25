@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=24:00:00
+#PBS -l mem=128gb
+
+ml load Single-cell-python-bundle/2024.02-foss-2023a
+ml load  R-bundle-Bioconductor/3.18-foss-2023a-R-4.3.2  
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/epiphany/data_preparation
+
+Rscript hicdcplus_norm_sig.R
+
+for dataset in K562; do
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/ground_truth/intermediate/${dataset}_10000_result.txt.gz"
+    
+    python convert_hic_norm.py --norm_hic_file $path --chrom_len_file "hg38.chrom.sizes" \
+        --save_dir /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/epiphany/ground_truth/${dataset} \
+        --normalization_type "obs-over-exp" \
+        --cell_type $dataset \
+        --hic_resolution 10000
+done

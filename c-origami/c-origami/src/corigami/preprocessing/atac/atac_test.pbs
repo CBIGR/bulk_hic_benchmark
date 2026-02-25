@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=06:00:00
+#PBS -l mem=32gb
+
+ml load  seqtk/1.4-GCC-13.3.0 
+ml load SAMtools/1.21-GCC-13.3.0 
+
+bash ./atac_pipeline.sh

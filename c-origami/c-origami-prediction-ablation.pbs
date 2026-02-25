@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=70:00:00
+#PBS -l mem=8gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+module load torchvision/0.16.0-foss-2023a
+module load pyBigWig/0.3.22-gfbf-2023a
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/c-origami/src
+
+
+for dataset in IMR90 GM12878; do
+    # 1: dna, 2: ctcf, 3: atac, 4: dna+ctcf, 5: dna+atac, 6: ctcf+atac
+    output_path="outputs"
+    for ablation in {1..6}; do
+    
+        dna_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/data/hg38/dna_sequence"
+        dna_ablation_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/ablation_testing/data/dna_sequence"
+        
+        if [ $dataset = "IMR90" ]; then
+        
+            ctcf_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/data/hg38/imr90/genomic_features/ctcf_log2fc.bw"
+            atac_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/data/hg38/imr90/genomic_features/atac.bw"
+            ablation_dir="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/ablation_testing/data/imr90/genomic_features"
+            if [ $ablation = 1 ]; then
+                output_path="outputs/ablation_testing/dna"
+                dna_path=$dna_ablation_path
+            elif [ $ablation = 2 ]; then
+                ctcf_path="${ablation_dir}/ctcf_log2f.bw"
+                output_path="outputs/ablation_testing/ctcf"
+            elif [ $ablation = 3 ]; then
+                atac_path="${ablation_dir}/atac.bw"
+                output_path="outputs/ablation_testing/atac"
+            elif [ $ablation = 4 ]; then
+                ctcf_path="${ablation_dir}/ctcf_log2f.bw"
+                dna_path=$dna_ablation_path
+                output_path="outputs/ablation_testing/dna_ctcf"
+            elif [ $ablation = 5 ]; then
+                atac_path="${ablation_dir}/atac.bw"
+                dna_path=$dna_ablation_path
+                output_path="outputs/ablation_testing/dna_atac"
+            elif [ $ablation = 6 ]; then
+                ctcf_path="${ablation_dir}/ctcf_log2f.bw"
+                atac_path="${ablation_dir}/atac.bw"
+                output_path="outputs/ablation_testing/ctcf_atac"
+            fi
+            
+        elif [ $dataset = "GM12878" ]; then
+
+            ctcf_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/data/hg38/gm12878/genomic_features/ctcf_log2fc.bw"
+            atac_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/data/hg38/gm12878/genomic_features/atac.bw"
+            ablation_dir="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/ablation_testing/data/gm12878/genomic_features"
+            if [ $ablation = 1 ]; then
+                output_path="outputs/ablation_testing/dna"
+                dna_path=$dna_ablation_path
+            elif [ $ablation = 2 ]; then
+                ctcf_path="${ablation_dir}/ctcf_log2f.bw"
+                output_path="outputs/ablation_testing/ctcf"
+            elif [ $ablation = 3 ]; then
+                atac_path="${ablation_dir}/atac.bw"
+                output_path="outputs/ablation_testing/atac"
+            elif [ $ablation = 4 ]; then
+                ctcf_path="${ablation_dir}/ctcf_log2f.bw"
+                dna_path=$dna_ablation_path
+                output_path="outputs/ablation_testing/dna_ctcf"
+            elif [ $ablation = 5 ]; then
+                atac_path="${ablation_dir}/atac.bw"
+                dna_path=$dna_ablation_path
+                output_path="outputs/ablation_testing/dna_atac"
+            elif [ $ablation = 6 ]; then
+                ctcf_path="${ablation_dir}/ctcf_log2f.bw"
+                atac_path="${ablation_dir}/atac.bw"
+                output_path="outputs/ablation_testing/ctcf_atac"
+            fi
+        fi
+            
+        # Loop through chromosomes 1 to 22
+        for chr in 10 15 5 6; do
+            # Get the length of the chromosome (example values for GRCh38)
+            case $chr in
+                1) chr_length=240000000 ;;
+                2) chr_length=240000000 ;;
+                3) chr_length=190000000 ;;
+                4) chr_length=190000000 ;;
+                5) chr_length=180000000 ;;
+                6) chr_length=170000000 ;;
+                7) chr_length=150000000 ;;
+                8) chr_length=140000000 ;;
+                9) chr_length=130000000 ;;
+                10) chr_length=130000000 ;;
+                11) chr_length=130000000 ;;
+                12) chr_length=130000000 ;;
+                13) chr_length=110000000 ;;
+                14) chr_length=100000000 ;;
+                15) chr_length=100000000 ;;
+                16) chr_length=90000000 ;;
+                17) chr_length=80000000 ;;
+                18) chr_length=80000000 ;;
+                19) chr_length=50000000 ;;
+                20) chr_length=60000000 ;;
+                21) chr_length=40000000 ;;
+                22) chr_length=50000000 ;;
+        
+            esac
+        
+            slice_size=2000000
+            # Loop through positions in increments of 2 million
+            for ((start=1000000; start<$chr_length; start+=$slice_size)); do
+                end=$((start + slice_size - 1))
+        
+                # Make sure we don't go past the chromosome length
+                if (( start >= chr_length - 2000000 )); then
+                    break
+                fi
+        
+                # Here, you can perform your task, e.g., extract sequence or perform analysis
+                # Replace the echo statement with your actual command
+                echo "Chromosome: $chr, Start: $start, End: $end, Slice: $slice_size"
+                chrname="chr$chr"
+                
+                python corigami/inference/prediction.py \
+                    --out $output_path \
+                    --chr $chrname \
+                    --celltype $dataset \
+                    --start $start \
+                    --model "/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/c-origami/corigami-dataset/model_weights/corigami_base.ckpt" \
+                    --seq $dna_path \
+                    --ctcf $ctcf_path \
+                    --atac $atac_path
+            echo "Done $dataset $chr abaltion $ablation"        
+            done
+        done
+    done
+done

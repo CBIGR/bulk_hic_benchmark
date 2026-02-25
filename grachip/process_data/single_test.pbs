@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=8:00:00
+#PBS -l mem=32gb
+
+ml load Single-cell-python-bundle/2024.02-foss-2023a
+ml load SAMtools/0.1.20-GCC-12.3.0
+ml load BEDTools/2.31.0-GCC-12.3.0  
+
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/process_data
+
+dataset="IMR90"
+data_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/${dataset}_raw"
+processed_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/$dataset"
+    
+modality="test"
+
+python ./call_gauss.py --in_bedpe ${data_path}/output.bedpe --chr_sizes ./hg38.chrom.sizes --outname ${data_path}/output.bedgraph
+
+# convert to bigwig
+./bedSort $data_path/output.bedgraph $data_path/sorted_output.bedgraph
+./bedGraphToBigWig $data_path/sorted_output.bedgraph hg38.chrom.sizes $processed_path/${modality}_${dataset}.bw
+    
+echo "Finish! Data is saved as ${modality}_${dataset}.bw"
+    
+
+    
+    
+    
+    
+    
+    

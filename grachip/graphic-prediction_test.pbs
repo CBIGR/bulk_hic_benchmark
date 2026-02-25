@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=quarter:gpus=1
+#PBS -l walltime=00:30:00
+#PBS -l mem=64gb
+
+module load Single-cell-python-bundle/2024.02-foss-2023a
+# module load torchvision/0.16.0-foss-2023a
+module load pyBigWig/0.3.22-gfbf-2023a
+ml load pyfaidx/0.8.1.1-GCCcore-12.3.0 
+module load PyTorch-Geometric/2.5.0-foss-2023a-PyTorch-2.1.2
+ml load OpenNMT-py/3.5.1-foss-2023a-CUDA-12.1.1 
+ml load Rust/1.70.0-GCCcore-12.3.0  
+ml load pybedtools/0.9.1-foss-2023a 
+ml load HF-Datasets/2.18.0-gfbf-2023a 
+
+cd "/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/GRACHIP"
+data_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data"
+model_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/models"
+python prediction.py \
+    --model "$model_path/model.pt" \
+	--chrom "chr2" \
+	--start 196760000 \
+	--genomic_data_paths "$data_path/bwlist.txt" \
+	--output "./output" \
+	--genome_path "$data_path/hg38.fa" \
+	--input_edge "$data_path/input.cool" \
+	--DNABERT "$model_path/6-new-12w-0"
+    

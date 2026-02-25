@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=03:00:00
+#PBS -l mem=8gb
+
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/GM12878_raw
+# GM12878 dataset
+# echo GM12878
+# curl -o 4DNFIXP4QG5B_hic_GM12878.mcool -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIXP4QG5B/@@download/4DNFIXP4QG5B.mcool
+# curl -o 4DNFI2G71DR4_rep2_CFTF_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI2G71DR4/@@download/4DNFI2G71DR4.bam
+# curl -o 4DNFI9U71IB4_rep1_CFTF_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI9U71IB4/@@download/4DNFI9U71IB4.bam
+# curl -o 4DNFI5R24BXO_rep1_H3K4me1_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI5R24BXO/@@download/4DNFI5R24BXO.bam
+# curl -o 4DNFI44D73KU_rep2_H3K4me1_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI44D73KU/@@download/4DNFI44D73KU.bam
+# curl -o 4DNFIQ69E2QT_rep1_H3K4me3_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIQ69E2QT/@@download/4DNF
+# IQ69E2QT.bam
+# curl -o 4DNFIP9JYOC7_rep2_H3K4me3_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIP9JYOC7/@@download/4DNF
+# IP9JYOC7.bam
+# curl -o 4DNFIU38AOAH_rep1_H3K27ac_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIU38AOAH/@@download/4DNF
+# IU38AOAH.bam
+# curl -o 4DNFIPCWBPL6_rep1_H3K27ac_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIPCWBPL6/@@download/4DNF
+# IPCWBPL6.bam
+# curl -o 4DNFI74K8QSV_rep1_H3K27me3_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI74K8QSV/@@download/4DN
+# FI74K8QSV.bam
+# curl -o 4DNFIMJZ5B1V_rep2_H3K27me3_GM12878.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIMJZ5B1V/@@download/4DN
+# FIMJZ5B1V.bam
+# wget -O ENCFF603BJO_ATAC.bigWig https://www.encodeproject.org/files/ENCFF603BJO/@@download/ENCFF603BJO.bigWig #process
+
+# K562 dataset
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/K562_raw
+echo K562
+curl -o 4DNFITUOMFUQ_hic_K562.hic -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFITUOMFUQ/@@download/4DNFITUOMFUQ.hic
+curl -o 4DNFIGP1R3AP_rep1_CFTF_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIGP1R3AP/@@download/4DNFIGP1R3AP.bam
+curl -o 4DNFIMX1TC1F_rep2_CFTF_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIMX1TC1F/@@download/4DNFIMX1TC1F.bam
+curl -o 4DNFI9XDO4XQ_rep1_H3K4me1_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI9XDO4XQ/@@download/4DNFI9XDO4XQ.bam
+curl -o 4DNFITZO3ODU_rep2_H3K4me1_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFITZO3ODU/@@download/4DNFITZO3ODU.bam
+curl -o 4DNFIA9FCYJ6_rep1_H3K4me3_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIA9FCYJ6/@@download/4DNFIA9FCYJ6.bam
+curl -o 4DNFI4WI95J5_rep2_H3K4me3_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI4WI95J5/@@download/4DNFI4WI95J5.bam
+curl -o 4DNFIEYAZI72_rep1_H3K27ac_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIEYAZI72/@@download/4DNFIEYAZI72.bam
+curl -o 4DNFIBDJW6IC_rep1_H3K27me3_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIBDJW6IC/@@download/4DNFIBDJW6IC.bam
+curl -o 4DNFIRWKCRVO_rep2_H3K27me3_K562.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIRWKCRVO/@@download/4DNFIRWKCRVO.bam
+wget -O ENCFF102ARJ_ATAC_K562.bigWig https://www.encodeproject.org/files/ENCFF102ARJ/@@download/ENCFF102ARJ.bigWig #process
+
+# H1 dataset
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/H1_raw
+echo H1
+curl -o 4DNFIQYQWPF5_hic_H1.hic -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIQYQWPF5/@@download/4DNFIQYQWPF5.hic
+curl -o 4DNFIQY7L3RB_rep1_CFTF_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIQY7L3RB/@@download/4DNFIQY7L3RB.bam
+curl -o 4DNFIQGEU6WS_rep2_CFTF_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIQGEU6WS/@@download/4DNFIQGEU6WS.bam
+curl -o 4DNFIMKPS3B5_rep2_H3K4me1_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIMKPS3B5/@@download/4DNFIMKPS3B5.bam
+curl -o 4DNFIU973P2X_rep1_H3K4me1_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIU973P2X/@@download/4DNFIU973P2X.bam
+curl -o 4DNFIBC19N9Z_rep1_H3K4me3_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIBC19N9Z/@@download/4DNFIBC19N9Z.bam
+curl -o 4DNFIU2WN75X_rep2_H3K4me3_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIU2WN75X/@@download/4DNFIU2WN75X.bam
+curl -o 4DNFI258RO3L_rep1_H3K27ac_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFI258RO3L/@@download/4DNFI258RO3L.bam
+curl -o 4DNFIYET6YFK_rep2_H3K27ac_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIYET6YFK/@@download/4DNFIYET6YFK.bam
+curl -o 4DNFIE1XUS5M_rep1_H3K27me3_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIE1XUS5M/@@download/4DNFIE1XUS5M.bam
+curl -o 4DNFIVEYA5ZH_rep2_H3K27me3_H1.bam -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFIVEYA5ZH/@@download/4DNFIVEYA5ZH.bam
+curl -o 4DNFICPNO4M5_ATAC_H1.bw -L --user OV5QDJOQ:kespmdxprqzxsrzw https://data.4dnucleome.org/files-processed/4DNFICPNO4M5/@@download/4DNFICPNO4M5.bw #processed
+

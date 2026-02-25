@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=quarter:gpus=1
+#PBS -l walltime=12:00:00
+#PBS -l mem=64gb
+
+ml load accelerate/0.33.0-foss-2023a-CUDA-12.1.1  
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/hiccup
+
+model_name="raw"
+resolution=10000
+for dataset in GM12878 K562 H1 IMR90; do
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/data/${dataset}.hic"
+    output="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/hiccup/output/${dataset}/${model_name}/count"
+    java -jar juicer_tools_1.22.01.jar hiccups -k KR -r $resolution -f 0.1 -t 1.5 -p 2 -i 5 -d 20000 $path $output
+done

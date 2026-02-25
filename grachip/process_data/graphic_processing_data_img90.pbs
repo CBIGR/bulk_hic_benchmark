@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=12:00:00
+#PBS -l mem=32gb
+
+ml load Single-cell-python-bundle/2024.02-foss-2023a
+ml load SAMtools/0.1.20-GCC-12.3.0
+ml load BEDTools/2.31.0-GCC-12.3.0  
+
+# cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/IMR90_raw
+# echo IMR90
+# wget -O ENCFF584CBK_rep1_CTCF_IMR90.bam https://www.encodeproject.org/files/ENCFF584CBK/@@download/ENCFF584CBK.bam
+# wget -O ENCFF160QTH_rep2_CTCF_IMR90.bam https://www.encodeproject.org/files/ENCFF160QTH/@@download/ENCFF160QTH.bam
+# wget -O ENCFF064XTS_rep1_H3K27ac_IMR90.bam https://www.encodeproject.org/files/ENCFF064XTS/@@download/ENCFF064XTS.bam
+# wget -O ENCFF827KCG_rep2_H3K27ac_IMR90.bam https://www.encodeproject.org/files/ENCFF827KCG/@@download/ENCFF827KCG.bam
+# wget -O ENCFF547BFL_rep1_H3K27me3_IMR90.bam https://www.encodeproject.org/files/ENCFF547BFL/@@download/ENCFF547BFL.bam
+# wget -O ENCFF084CZB_rep2_H3K27me3_IMR90.bam https://www.encodeproject.org/files/ENCFF084CZB/@@download/ENCFF084CZB.bam
+# wget -O ENCFF547BFL_rep1_H3K4me3_IMR90.bam https://www.encodeproject.org/files/ENCFF547BFL/@@download/ENCFF547BFL.bam
+# wget -O ENCFF355WLE_rep2_H3K4me3_IMR90.bam https://www.encodeproject.org/files/ENCFF355WLE/@@download/ENCFF355WLE.bam
+# wget -O ENCFF547BFL_rep1_H3K4me3_IMR90.bam https://www.encodeproject.org/files/ENCFF547BFL/@@download/ENCFF547BFL.bam
+# wget -O ENCFF355WLE_rep2_H3K4me3_IMR90.bam https://www.encodeproject.org/files/ENCFF355WLE/@@download/ENCFF355WLE.bam
+# wget -O ENCFF812CWF_rep1_H3K4me1_IMR90.bam https://www.encodeproject.org/files/ENCFF812CWF/@@download/ENCFF812CWF.bam
+# wget -O ENCFF927WHP_rep2_H3K4me1_IMR90.bam https://www.encodeproject.org/files/ENCFF927WHP/@@download/ENCFF927WHP.bam
+# wget -O ENCFF282RNO_ATAC_IMR90.bigWig https://www.encodeproject.org/files/ENCFF282RNO/@@download/ENCFF282RNO.bigWig
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/process_data
+
+dataset="IMR90"
+data_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/${dataset}_raw"
+processed_path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/grachip/grachip-dataset/grachip_data/${dataset}"
+    
+for modality in CTCF K4me K4me3 K27ac K27me3; do
+    if [ $modality = "K27me3" ]; then
+        data1="$data_path/ENCFF547BFL_rep1_H3K27me3_IMR90.bam"
+        data2="$data_path/ENCFF084CZB_rep2_H3K27me3_IMR90.bam"
+    elif [ $modality = "K4me" ]; then
+        data1="$data_path/ENCFF812CWF_rep1_H3K4me1_IMR90.bam"
+        data2="$data_path/ENCFF927WHP_rep2_H3K4me1_IMR90.bam"
+    elif [ $modality = "K4me3" ]; then
+        data1="$data_path/ENCFF547BFL_rep1_H3K4me3_IMR90.bam"
+        data2="$data_path/ENCFF355WLE_rep2_H3K4me3_IMR90.bam"
+    elif [ $modality = "K27ac" ]; then
+        data1="$data_path/ENCFF064XTS_rep1_H3K27ac_IMR90.bam"
+        data2="$data_path/ENCFF827KCG_rep2_H3K27ac_IMR90.bam"
+    elif [ $modality = "CTCF" ]; then
+        data1="$data_path/ENCFF584CBK_rep1_CTCF_IMR90.bam"
+        data2="$data_path/ENCFF160QTH_rep2_CTCF_IMR90.bam"
+    fi
+    
+    echo $dataset
+    echo $modality
+    echo $data1
+    echo $data2
+    
+
+    if [ -z "$data2" ]; then
+        java -jar picard.jar SortSam I=$data1 O=$data_path/merged_files.bam SORT_ORDER=coordinatejava
+    else
+        java -jar picard.jar MergeSamFiles I=$data1 I=$data2 O=$data_path/merged_files.bam
+    fi
+
+    java -jar picard.jar MarkDuplicates I="$data_path/merged_files.bam" O=$data_path/marked_duplicates.bam M=$data_path/marked_dup_metrics.txt
+    
+    # remove duplicate
+    
+    samtools view -F 1024 -f 2 -b $data_path/marked_duplicates.bam
+    
+    # The alignments are converted into bedpe format using bedtools 
+    bedtools bamtobed -i $data_path/marked_duplicates.bam -bedpe > $data_path/output.bedpe
+    
+    # cleaning and sorting recommended for peak calling with SEACR 
+    awk '$1==$4 && $1!="." && $6-$2 < 1000 {print $0}' $data_path/output.bedpe | cut -f 1-6 | sort -k1,1 -k2,2n -k3,3n
+    
+    # chrome size file
+    # ./fetchChromSizes hg38 > hg38.chrom.sizes
+    
+    # convert to bed graph, apply guassian smoothing 
+    # => creates a Gaussian distribution around the midpoint of each read.
+    # => Locations with more overlapping reads are thus represented by larger peaks.
+    python call_gauss.py \
+        --in_bedpe $data_path/output.bedpe \
+        --chr_sizes hg38.chrom.sizes \
+        --outname $data_path/output.bedgraph
+    
+    
+    # convert to bigwig
+    ./bedSort ${data_path}/output.bedgraph ${data_path}/sorted_output.bedgraph
+    ./bedGraphToBigWig ${data_path}/sorted_output.bedgraph hg38.chrom.sizes ${processed_path}/${modality}_${dataset}.bw
+    
+    rm "$data_path/merged_files.bam"
+    rm "$data_path/marked_dup_metrics.txt"
+    rm "${data_path}/output.bedpe"
+    rm "${data_path}/output.bedgraph"
+    rm "${data_path}/sorted_output.bedgraph"
+    rm ${data_path}/marked_duplicates.bam
+    echo "Finish! Data is saved as ${modality}_${dataset}.bw"
+done
+
+    
+    
+    
+    
+    
+    

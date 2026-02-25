@@ -1,0 +1,14 @@
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=70:00:00
+#PBS -l mem=64g
+
+ml load Single-cell-python-bundle/2024.02-foss-2023a
+ml load SCENICplus/1.0a1-20240513-foss-2023a
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/SIP/downstream
+
+for model in raw corigami epiphany hicdiffusion chromafold grachip; do
+    path_save="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/SIP/downstream/output"
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/SIP/output/K562/${model}/count/Loops.txt"
+    python CollecTRI.py --path $path --path_save ${path_save} --model $model
+done
