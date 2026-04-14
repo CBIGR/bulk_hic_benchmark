@@ -53,8 +53,7 @@ The repository is organized as follows:
 ## Usage
 Each model folder includes detailed instructions on how to preprocess data, train the model, and generate predictions. Loop detection folders provide scripts to run loop callers on predicted contact maps. Finally, the comparison analysis notebooks demonstrate how to reproduce the evaluation results.
 
-## Reference
-Source codes:
+## Source code of the models
 - C.Origami: [https://github.com/tanjimin/C.Origami.git](https://github.com/tanjimin/C.Origami.git)
 - Epiphany: [https://github.com/arnavmdas/epiphany.git](https://github.com/arnavmdas/epiphany.git)
 - HiCDiffusion: [https://github.com/SFGLab/HiCDiffusion.git](https://github.com/SFGLab/HiCDiffusion.git)
