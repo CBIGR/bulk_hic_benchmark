@@ -22,8 +22,7 @@ For each model:
    - Image quality  
    - Loop detection (using 4 loop callers: HICCUPS, SIP, LASCA, Mustache)
   
-<img width="1779" height="1301" alt="process_v2" src="https://github.com/user-attachments/assets/0775e626-bbbc-4d73-b848-218eaacb3ab7" />
-
+![process drawio](https://github.ugent.be/vermeirssenlab/MasterThesis_Thu/assets/14965/08abcf07-9b45-437b-838c-e0fb8038e3e8)
 
 
 ## Repository Structure
@@ -64,3 +63,16 @@ Source codes:
 - HICCUPS: [https://github.com/aidenlab/juicer/wiki/HiCCUPS](https://github.com/aidenlab/juicer/wiki/HiCCUPS)
 - LASCA: [https://github.com/ArtemLuzhin/LASCA_pipeline.git](https://github.com/ArtemLuzhin/LASCA_pipeline.git)  
 - Mustache: [https://github.com/ay-lab/mustache.git](https://github.com/ay-lab/mustache.git)
+
+License
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+```
+MIT License
+
+Copyright (c) 2026 CBIGR - Lab Vanessa Vermeirssen
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction...
+```

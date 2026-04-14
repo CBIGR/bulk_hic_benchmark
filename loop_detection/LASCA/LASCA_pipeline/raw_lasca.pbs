@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+#PBS -l nodes=1:ppn=8
+#PBS -l walltime=48:00:00
+#PBS -l mem=64gb
+
+ml load cooler/0.10.2-foss-2023b
+ml load  hic-straw/1.3.1-foss-2023b
+ml load statsmodels/0.14.1-gfbf-2023b 
+
+cd /scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/LASCA/LASCA_pipeline
+
+resolution=10000
+model_name="raw"
+distance=200
+
+for dataset in K562 H1 IMR90 GM12878; do
+    path="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/data/${dataset}.mcool"
+    output="/scratch/gent/vo/000/gvo00027/projects/CBIGR/24NHT_master_thesis/code/loop_detection/LASCA/output/${dataset}/${model_name}/count"
+    python LASCA_run_loop_cool.py --hic ${path} --res $resolution --distance $distance --output ${output}
+
+done
